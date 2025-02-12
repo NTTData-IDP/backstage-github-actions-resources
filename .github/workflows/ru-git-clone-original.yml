@@ -84,6 +84,7 @@ on:
 
 jobs:
   save-state-git-clone:
+    name: Git Clone
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository

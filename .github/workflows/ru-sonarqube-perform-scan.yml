@@ -46,6 +46,7 @@ on:
 
 jobs:
   sonarqube_scan:
+    name: Sonarqube Scan
     runs-on: ubuntu-latest
 
     steps:
@@ -153,9 +154,9 @@ jobs:
 
 
       - name: SonarQube Scan
-        uses: sonarsource/sonarqube-scan-action@v2.3.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+        uses: sonarsource/sonarqube-scan-action@v4.2.1 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
         env:
           # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_TOKEN: "sqa_f0d1d0b8867d5fa39d1dbf7d7fe94697f00c3c93"
-          SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+          SONAR_HOST_URL: "${{ inputs.SONAR_HOST_URL }}"
           LC_ALL: "ru_RU.UTF-8"
