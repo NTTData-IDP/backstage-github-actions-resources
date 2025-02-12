@@ -35,6 +35,14 @@ on:
         description: 'Name of the file of the password within the SonarQube credentials workspace'
         type: string
         default: 'password'
+      UNIT_TEST:
+        description: 'Triggers the skip tests command'
+        type: string
+        default: 'False'
+      PROJECT_LANGUAGE:
+        description: 'Language of the project'
+        type: string
+        default: 'Language'
 
 jobs:
   sonarqube_scan:
