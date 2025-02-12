@@ -1,0 +1,153 @@
+name: Task - SonarQube Perform Scan
+
+on:
+  workflow_call:
+    inputs:
+      SONAR_HOST_URL:
+        description: 'SonarQube server URL'
+        type: string
+        required: true
+      SONAR_PROJECT_KEY:
+        description: "Project's unique key"
+        type: string
+        required: true
+      PROJECT_VERSION:
+        description: 'Version of the project'
+        type: string
+        default: '1.0'
+      SOURCE_TO_SCAN:
+        description: 'Paths to directories containing main source files'
+        type: string
+        default: '.'
+      SONAR_ORGANIZATION:
+        description: 'The organization in SonarQube where the project exists'
+        type: string
+        default: ''
+      SONAR_SCANNER_IMAGE:
+        description: 'The SonarQube scanner CLI image which will run the scan'
+        type: string
+        default: 'docker.io/sonarsource/sonar-scanner-cli:5@sha256:494ecc3b5b1ee1625bd377b3905c4284e4f0cc155cff397805a244dee1c7d575'
+      SONAR_LOGIN_KEY:
+        description: 'Name of the file of the login within the SonarQube credentials workspace'
+        type: string
+        default: 'login'
+      SONAR_PASSWORD_KEY:
+        description: 'Name of the file of the password within the SonarQube credentials workspace'
+        type: string
+        default: 'password'
+
+jobs:
+  sonarqube_scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Create sonar properties
+        run: |
+          replaceValues() {
+            filename=$1
+            thekey=$2
+            newvalue=$3
+            if ! grep -R "^[#]*\s*${thekey}=.*" $filename >/dev/null; then
+              echo "APPENDING because '${thekey}' not found"
+              echo "" >>$filename
+              echo "$thekey=$newvalue" >>$filename
+            else
+              echo "SETTING because '${thekey}' found already"
+              sed -i "s|^[#]*\s*${thekey}=.*|$thekey=$newvalue|" $filename
+            fi
+          }
+
+          if [[ -f sonar-project.properties ]]; then
+            echo "Sonar project properties file exists."
+            if [[ -n "${{ inputs.SONAR_HOST_URL }}" ]]; then
+              replaceValues sonar-project.properties sonar.host.url "${{ inputs.SONAR_HOST_URL }}"
+            fi
+            if [[ -n "${{ inputs.SONAR_PROJECT_KEY }}" ]]; then
+              replaceValues sonar-project.properties sonar.projectKey "${{ inputs.SONAR_PROJECT_KEY }}"
+            fi
+            if [ "${{ inputs.UNIT_TEST }}" != "False" ]; then
+              if [ "${{ inputs.PROJECT_LANGUAGE }}" = "angular" ] || [ "${{ inputs.PROJECT_LANGUAGE }}" = "react" ]; then
+                echo "Adding node properties"
+                echo "sonar.javascript.lcov.reportPaths=coverage/lcov.info" >> sonar-project.properties
+              fi
+              if [ "${{ inputs.PROJECT_LANGUAGE}}" = "netcore" ]; then
+                echo "Adding netcore properties"
+                echo "sonar.cs.vscoveragexml.reportsPaths=coverage.xml" >> sonar-project.properties
+              fi
+            else
+              echo "Adding coverage exclusion in sonar properties"
+              echo "sonar.coverage.exclusions=**/*" >> sonar-project.properties
+            fi
+            echo "Values in sonar-project.properties file replaced successfully..."
+          else
+            echo "Creating sonar-project.properties file..."
+            touch sonar-project.properties
+            if [ "${{ inputs.UNIT_TEST }}" != "False" ]; then
+              if [ "${{ inputs.PROJECT_LANGUAGE }}" = "angular" ] || [ "${{ inputs.PROJECT_LANGUAGE }}" = "react" ]; then
+                echo "Not adding coverage exclusions and adding test execution report path"
+                echo "sonar.javascript.lcov.reportPaths=coverage/lcov.info" >> sonar-project.properties
+              fi
+              if [ "${{ inputs.PROJECT_LANGUAGE }}" = "netcore" ]; then
+                echo "Not adding coverage exclusions and adding test execution report path"
+                echo "sonar.cs.vscoveragexml.reportsPaths=./coverage.xml" >> sonar-project.properties
+              fi
+            else
+              echo "Adding coverage exclusion in sonar properties"
+              echo "sonar.coverage.exclusions=**/*" >> sonar-project.properties
+            fi
+            [[ -n "${{ inputs.SONAR_PROJECT_KEY }}" ]] && {
+              echo "sonar.projectKey=${{ inputs.SONAR_PROJECT_KEY }}" >> sonar-project.properties
+            } || {
+              echo "missing property SONAR_PROJECT_KEY"
+              exit 1
+            }
+
+            [[ -n "${{ inputs.SONAR_HOST_URL }}" ]] && {
+              echo "sonar.host.url=${{ inputs.SONAR_HOST_URL }}" >> sonar-project.properties
+            } || {
+              echo "missing property SONAR_HOST_URL"
+              exit 1
+            }
+
+            [[ -n "${{ inputs.PROJECT_VERSION }}" ]] && {
+              echo "sonar.projectVersion=${{ inputs.PROJECT_VERSION }}" >> sonar-project.properties
+            } || {
+              echo "missing property PROJECT_VERSION"
+              exit 1
+            }
+
+            [[ -n "${{ inputs.SONAR_ORGANIZATION }}" ]] && {
+              echo "sonar.organization=${{ inputs.SONAR_ORGANIZATION }}" >> sonar-project.properties
+            } || {
+              echo "missing property SONAR_ORGANIZATION"
+              exit 1
+            }
+            echo "sonar.sources=${{ inputs.SOURCE_TO_SCAN }}" >> sonar-project.properties
+            echo "---------------------------"
+          fi
+
+          SONAR_LOGIN="${{ inputs.SONAR_LOGIN_KEY }}"
+          replaceValues sonar-project.properties sonar.login "$SONAR_LOGIN"
+          SONAR_PASSWORD="${{inputs.SONAR_PASSWORD_KEY}}"
+          replaceValues sonar-project.properties sonar.password "$SONAR_PASSWORD"
+
+          # Mostrar el contenido del archivo sonar-project.properties
+          cat sonar-project.properties
+        shell: bash
+
+
+      - name: SonarQube Scan
+        uses: sonarsource/sonarqube-scan-action@v2.3.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
+        env:
+          # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: "sqa_f0d1d0b8867d5fa39d1dbf7d7fe94697f00c3c93"
+          SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+          LC_ALL: "ru_RU.UTF-8"

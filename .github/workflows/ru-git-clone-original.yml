@@ -1,0 +1,121 @@
+name: "Task - Git Clone Original"
+
+on:
+  workflow_call:
+    inputs:
+      REPO_URL:
+        description: "The repository REPO_URL."
+        required: true
+        type: string
+      GIT_REVISION:
+        description: "The GIT_REVISION to checkout."
+        required: true
+        type: string
+      REF_SPEC:
+        description: "Refspec to fetch before checking out GIT_REVISION."
+        required: false
+        type: string
+        default: ""
+      SUBMODULES:
+        description: "Initialize and fetch git submodules."
+        required: false
+        type: boolean
+        default: true
+      DEPTH:
+        description: "Perform a shallow clone, fetching only the most recent N commits."
+        type: string
+        required: false
+        default: "1"
+      SSL_VERIFY:
+        description: "Set the 'http.sslVerify' global git config."
+        type: string
+        required: false
+        default: "true"
+      CRT_FILE_NAME:
+        description: "File name of mounted crt using ssl-ca-directory workspace."
+        type: string
+        required: false
+        default: "ca-bundle.crt"
+      SUBDIRECTORY:
+        description: "Subdirectory inside the 'output' Workspace to clone the repo into."
+        type: string
+        required: false
+        default: ""
+      PARSE_CHECKOUT_DIRECTORIES:
+        description: "Define the directory patterns to match or exclude when performing a sparse checkout."
+        type: string
+        required: false
+        default: ""
+      DELETE_EXISTING:
+        description: "Clean out the contents of the destination directory if it already exists before cloning."
+        type: string
+        required: false
+        default: "true"
+      HTTP_PROXY:
+        description: "HTTP proxy server for non-SSL requests."
+        type: string
+        required: false
+        default: ""
+      HTTPS_PROXY:
+        description: "HTTPS proxy server for SSL requests."
+        type: string
+        required: false
+        default: ""
+      NO_PROXY:
+        description: "Opt out of proxying HTTP/HTTPS requests."
+        type: string
+        required: false
+        default: ""
+      VERBOSE:
+        description: "Log the commands that are executed during 'git-clone' operations."
+        type: string
+        required: false
+        default: "true"
+      GIT_INIT_IMAGE:
+        description: "The image providing the git-init binary that this Task runs."
+        type: string
+        required: false
+        default: "gcr.io/tekton-releases/github.com/tektoncd/pipeline/cmd/git-init:v0.40.2"
+      USER_HOME:
+        description: "Absolute path to the user home directory."
+        type: string
+        required: false
+        default: "./"
+
+jobs:
+  save-state-git-clone:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      
+      - name: Clone Repository
+        env:
+          GIT_SSL_NO_VERIFY: ${{ inputs.SSL_VERIFY }}
+          # GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
+          # TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
+        run: |
+          export HOME="${{ inputs.USER_HOME }}"
+          if [ "${{ inputs.VERBOSE }}" = "true" ]; then
+            set -x
+          fi
+
+          if [ -d "${{ inputs.SUBDIRECTORY }}" ]; then
+            if [ "${{ inputs.DELETE_EXISTING }}" = "true" ]; then
+              rm -rf "${{ inputs.SUBDIRECTORY }}"
+            fi
+          fi
+
+          REPO_URL="${{ inputs.REPO_URL }}"
+          REPO_URL="${REPO_URL/git:\/\//https:\/\/}"
+          REPO_URL="https://carlos-crespo-cambra-NTT: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@${REPO_URL#https://}"
+
+          git clone --depth ${{ inputs.depth }} $REPO_URL ${{ inputs.SUBDIRECTORY }}
+          cd ${{ inputs.SUBDIRECTORY }}
+          git fetch --all
+          git checkout 

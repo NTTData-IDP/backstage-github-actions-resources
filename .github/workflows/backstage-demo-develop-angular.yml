@@ -1,0 +1,91 @@
+name: "Pipeline - Develop Angular"
+on:
+  workflow_call:
+    inputs:
+      REPO_URL:
+        description: 'The git repo URL to clone from'
+        required: true
+        type: string
+      REPO_NAME:
+        description: 'Name of the repo'
+        required: true
+        type: string
+      GIT_REVISION:
+        description: 'The git revision'
+        required: true
+        type: string
+        default: "master"
+      SONARQUBE_SCAN:
+        description: 'Triggers the SonarQube scan task'
+        required: true
+        type: string
+      SONAR_HOST_URL:
+        description: 'SonarQube server URL'
+        required: true
+        type: string
+      SONAR_PROJECT_KEY:
+        description: 'Project unique key'
+        required: true
+        type: string
+      SOURCE_TO_SCAN:
+        description: 'Comma-separated paths to directories containing main source files'
+        required: true
+        type: string
+      SONAR_ORGANIZATION:
+        description: 'SonarQube organization'
+        required: true
+        type: string
+      IMAGE:
+        description: 'IMAGE name'
+        required: true
+        type: string
+      ORG_NAME:
+        description: 'GitHub organization name'
+        required: true
+        type: string
+      UNIT_TEST:
+        description: 'Triggers the skip tests command'
+        required: true
+        type: string
+      PROJECT_LANGUAGE:
+        description: 'Language of the project'
+        required: true
+        type: string
+jobs:
+
+  fetch-source:
+    uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-git-clone-original.yml@master
+    secrets: inherit
+    with:
+      REPO_URL: ${{ inputs.REPO_URL }}
+      GIT_REVISION: ${{ inputs.GIT_REVISION }}
+      REPO_NAME: ${{ inputs.REPO_NAME }}
+  test-results-node:
+    needs: fetch-source
+    if: ${{ inputs.UNIT_TEST == 'true' }}
+    uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-test-results-node.yml@master
+    secrets: inherit
+    with:
+      PROJECT_LANGUAGE: ${{ inputs.PROJECT_LANGUAGE }}
+  sonarqube-scan:
+    needs: [test-results-node, fetch-source]
+    if: ${{ inputs.SONARQUBE_SCAN == 'True' }}
+    uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-sonarqube-perform-scan.yml@master
+    secrets: inherit
+    with:
+      SONAR_HOST_URL: ${{ inputs.SONAR_HOST_URL }}
+      SONAR_PROJECT_KEY: ${{ inputs.SONAR_PROJECT_KEY }}
+      SOURCE_TO_SCAN: ${{ inputs.SOURCE_TO_SCAN }}
+      SONAR_ORGANIZATION: ${{ inputs.SONAR_ORGANIZATION }}
+      UNIT_TEST: ${{ inputs.UNIT_TEST }}
+      PROJECT_LANGUAGE: ${{ inputs.PROJECT_LANGUAGE }}
+
+  build-push:
+    needs: [sonarqube-scan, fetch-source]
+    if: ${{ always() }}
+    uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-build-push.yml@master
+    secrets: inherit
+    with:
+      IMAGE: ${{ inputs.IMAGE }}
+      IMAGE_TAG: ${{ inputs.GIT_REVISION }}
+      BUILDER_IMAGE: gcr.io/kaniko-project/executor:v1.6.0-debug

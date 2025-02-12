@@ -1,0 +1,37 @@
+name: Task - Test Results Node
+
+on:
+  workflow_call:
+    inputs:
+      PROJECT_LANGUAGE:
+        description: 'Language of the project (e.g., angular)'
+        type: string
+        required: true
+        default: 'node'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies and run tests
+        run: |
+          sudo apt-get update \
+          && sudo apt-get install -y wget gnupg \
+          && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add - \
+          && sudo sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+          && sudo apt-get update \
+          && sudo apt-get install -y google-chrome-stable fonts-ipafont-gothic fonts-wqy-zenhei fonts-thai-tlwg fonts-kacst fonts-freefont-ttf libxss1 \
+            --no-install-recommends \
+          && sudo rm -rf /var/lib/apt/lists/*
+          npm install
+          npm test
+        working-directory: ${{ github.workspace }}
