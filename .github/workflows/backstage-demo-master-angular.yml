@@ -1,4 +1,4 @@
-name: "Pipeline - Develop Angular"
+name: "Pipeline - Deploy Master Angular"
 on:
   workflow_call:
     inputs:
