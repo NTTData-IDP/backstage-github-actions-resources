@@ -143,10 +143,11 @@ jobs:
             echo "---------------------------"
           fi
 
-          SONAR_LOGIN="${{ inputs.SONAR_LOGIN_KEY }}"
-          replaceValues sonar-project.properties sonar.login "$SONAR_LOGIN"
-          SONAR_PASSWORD="${{inputs.SONAR_PASSWORD_KEY}}"
-          replaceValues sonar-project.properties sonar.password "$SONAR_PASSWORD"
+          # SONAR_LOGIN="${{ inputs.SONAR_LOGIN_KEY }}"
+          # replaceValues sonar-project.properties sonar.login "$SONAR_LOGIN"
+          # SONAR_PASSWORD="${{inputs.SONAR_PASSWORD_KEY}}"
+          # replaceValues sonar-project.properties sonar.password "$SONAR_PASSWORD"
+          replaceValues sonar-project.properties sonar.token "sqa_f0d1d0b8867d5fa39d1dbf7d7fe94697f00c3c93"
 
           # Mostrar el contenido del archivo sonar-project.properties
           cat sonar-project.properties
