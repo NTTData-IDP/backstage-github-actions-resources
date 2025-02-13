@@ -149,8 +149,6 @@ jobs:
           # replaceValues sonar-project.properties sonar.password "$SONAR_PASSWORD"
           replaceValues sonar-project.properties sonar.token "sqa_f0d1d0b8867d5fa39d1dbf7d7fe94697f00c3c93"
 
-          replaceValues sonar-project.properties sonar.projectCreation.mainBranchName "master"
-
           # Mostrar el contenido del archivo sonar-project.properties
           cat sonar-project.properties
         shell: bash
