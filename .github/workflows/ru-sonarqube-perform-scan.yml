@@ -160,5 +160,5 @@ jobs:
           # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_TOKEN: "sqa_f0d1d0b8867d5fa39d1dbf7d7fe94697f00c3c93"
           SONAR_HOST_URL: "${{ inputs.SONAR_HOST_URL }}"
-          SONAR_ROOT_CERT: ${{ secrets.SONAR_ROOT_CERT }}
+          # SONAR_ROOT_CERT: ${{ secrets.SONAR_ROOT_CERT }}
           # LC_ALL: "ru_RU.UTF-8"
