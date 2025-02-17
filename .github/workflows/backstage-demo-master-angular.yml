@@ -68,7 +68,7 @@ jobs:
       PROJECT_LANGUAGE: ${{ inputs.PROJECT_LANGUAGE }}
   sonarqube-scan:
     needs: [test-results-node, fetch-source]
-    if: ${{ inputs.SONARQUBE_SCAN == 'True' }}
+    if: ${{ inputs.SONARQUBE_SCAN == 'true' }}
     uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-sonarqube-perform-scan.yml@master
     secrets: inherit
     with:
