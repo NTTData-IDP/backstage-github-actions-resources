@@ -147,7 +147,7 @@ jobs:
           # replaceValues sonar-project.properties sonar.login "$SONAR_LOGIN"
           # SONAR_PASSWORD="${{inputs.SONAR_PASSWORD_KEY}}"
           # replaceValues sonar-project.properties sonar.password "$SONAR_PASSWORD"
-          replaceValues sonar-project.properties sonar.token "sqa_5a0ea56deff3509848ba946e456a353c88a24f8f"
+          replaceValues sonar-project.properties sonar.token "${{ secrets.SONARQUBE_API_KEY }}"
 
           # Mostrar el contenido del archivo sonar-project.properties
           cat sonar-project.properties
@@ -158,8 +158,7 @@ jobs:
         uses: sonarsource/sonarqube-scan-action@v2.3.0 # Ex: v2.1.0, See the latest version at https://github.com/marketplace/actions/official-sonarqube-scan
         env:
           # NODE_TLS_REJECT_UNAUTHORIZED: 0
-          # SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_TOKEN: "sqa_5a0ea56deff3509848ba946e456a353c88a24f8f"
+          SONAR_TOKEN: ${{ secrets.SONARQUBE_API_KEY }}
           SONAR_HOST_URL: "${{ inputs.SONAR_HOST_URL }}"
           # SONAR_ROOT_CERT: ${{ secrets.SONAR_ROOT_CERT }}
           # LC_ALL: "ru_RU.UTF-8"

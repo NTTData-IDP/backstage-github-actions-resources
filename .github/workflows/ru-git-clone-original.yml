@@ -99,7 +99,7 @@ jobs:
         env:
           GIT_SSL_NO_VERIFY: ${{ inputs.SSL_VERIFY }}
           # GITHUB_USERNAME: ${{ secrets.GITHUB_USERNAME }}
-          # TOKEN_GITHUB: ${{ secrets.TOKEN_GITHUB }}
+          TOKEN_GITHUB: ${{ secrets.OWNER_TOKEN }}
         run: |
           export HOME="${{ inputs.USER_HOME }}"
           if [ "${{ inputs.VERBOSE }}" = "true" ]; then
@@ -114,7 +114,7 @@ jobs:
 
           REPO_URL="${{ inputs.REPO_URL }}"
           REPO_URL="${REPO_URL/git:\/\//https:\/\/}"
-          REPO_URL="https://carlos-crespo-cambra-NTT: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@${REPO_URL#https://}"
+          REPO_URL="https://carlos-crespo-cambra-NTT:${TOKEN_GITHUB}@${REPO_URL#https://}"
 
           git clone --depth ${{ inputs.depth }} $REPO_URL ${{ inputs.SUBDIRECTORY }}
           cd ${{ inputs.SUBDIRECTORY }}
