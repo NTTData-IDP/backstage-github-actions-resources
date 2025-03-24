@@ -85,4 +85,4 @@ jobs:
         run: docker login ${{ inputs.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.OWNER_TOKEN }}
 
       - name: Docker push
-        run: docker push  "${{ inputs.IMAGE }}:latest"
+        run: docker push  "${{ inputs.IMAGE }}:${{ env.IMAGE_TAG }}"
