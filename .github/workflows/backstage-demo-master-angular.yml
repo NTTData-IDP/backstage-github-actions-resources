@@ -35,10 +35,6 @@ on:
         description: 'SonarQube organization'
         required: true
         type: string
-      ACR_REGISTRY:
-        description: 'ACR registry name'
-        required: true
-        type: string
       IMAGE:
         description: 'IMAGE name'
         required: true
@@ -89,7 +85,19 @@ jobs:
     uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-build-push.yml@master
     secrets: inherit
     with:
-      ACR_REGISTRY: ${{ inputs.ACR_REGISTRY }}
       IMAGE: ${{ inputs.IMAGE }}
       IMAGE_TAG: ${{ inputs.GIT_REVISION }}
       BUILDER_IMAGE: gcr.io/kaniko-project/executor:v1.6.0-debug
+
+  update-version:
+    needs: build-push
+    if: ${{ always() }}
+    uses: NTTData-IDP/backstage-github-actions-resources/.github/workflows/ru-update-version.yml@master
+    secrets: inherit
+    with:
+      REPO_NAME: ${{ inputs.REPO_NAME }}
+      IMAGE_TAG: ${{ inputs.GIT_REVISION }}
+      ENVIRONMENT: production
+      NAMESPACE: pro
+      ORG_NAME:  ${{ inputs.ORG_NAME }}
+      ONBOARDING_NAME: backstage-onboarding-resources
