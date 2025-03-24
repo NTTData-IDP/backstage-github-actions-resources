@@ -4,21 +4,21 @@ on:
   workflow_call:
     inputs:
       REPO_NAME:
-        description: 'The path to the yaml file to deploy within the git source'
+        description: "The path to the yaml file to deploy within the git source"
         type: string
       IMAGE_TAG:
-        description: 'Image tag'
+        description: "Image tag"
         type: string
       ENVIRONMENT:
-        description: 'Environment of deployment'
+        description: "Environment of deployment"
         default: development
         type: string
       NAMESPACE:
-        description: 'Namespace of deployment'
+        description: "Namespace of deployment"
         default: dev
         type: string
       ORG_NAME:
-        description: 'GitHub organization name'
+        description: "GitHub organization name"
         type: string
       ONBOARDING_NAME:
         description: Name of the onboarding repo
@@ -35,68 +35,32 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18'
+          node-version: "18"
 
       - name: Set image tag
         id: find-and-replace
         uses: mad9000/actions-find-and-replace-string@5
         with:
           source: ${{ inputs.IMAGE_TAG }}
-          find: 'refs/tags/'
-          replace: ''
-      - name: Update YAML
-        env:
-          ENVIRONMENT: ${{ inputs.environment }}
-          NAMESPACE: ${{ inputs.namespace }}
-          REPO_NAME: ${{ inputs.REPO_NAME }}
-          IMAGE_TAG: ${{ steps.find-and-replace.outputs.value }}
-          OWNER_TOKEN: ${{ secrets.OWNER_TOKEN }}
-          ORG_NAME: ${{ inputs.ORG_NAME }}
-          ONBOARDING_NAME: ${{ inputs.ONBOARDING_NAME }}
+          find: "refs/tags/"
+          replace: ""
+
+      - name: Clone ${{ inputs.ONBOARDING_NAME }} repository
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ env.ORGANIZATION_NAME }}/${{ inputs.ONBOARDING_NAME }}
+          path: ${{ inputs.ONBOARDING_NAME }}
+          ref: master
+          token: ${{ secrets.OWNER_TOKEN }}
+
+      - name: Update ${{ inputs.REPO_NAME }} Image Tag
         run: |
-          sudo apt-get update
-          sudo apt-get install -y jq curl
-
-          # Descargar el binario de yq
-          YQ_VERSION="v4.30.6"  # Cambia a la versión deseada
-          wget https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_amd64 -O /usr/local/bin/yq
-          chmod +x /usr/local/bin/yq
-
-          echo "${{ env.ENVIRONMENT }}"
-          echo "${{ env.NAMESPACE }}"
-          echo "${{ env.REPO_NAME }}"
-          echo "${{ env.IMAGE_TAG }}"
-          echo "${{ env.OWNER_TOKEN }}"
-          echo "${{ env.ORG_NAME }}"
-          echo "${{env.ONBOARDING_NAME}}"
-
-          # Verificar que las variables estén correctamente pobladas
-          if [ -z "${{ env.REPO_NAME }}" ] || [ -z "${{ env.ENVIRONMENT }}" ]; then
-            echo "Required environment variables are missing."
-            exit 1
-          fi
-
-          # Descargar el archivo values.yaml
-          URL="https://api.github.com/repos/${{ env.ORG_NAME }}/${{ env.ONBOARDING_NAME }}/contents/${{ env.REPO_NAME }}/values.yaml"
-          curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ env.OWNER_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" $URL | jq -r '.content' | base64 -d > values.yaml
-          
-          if [ ! -f values.yaml ]; then
-            echo "Failed to download values.yaml"
-            exit 1
-          fi
-
-          cat values.yaml
-
-          # Obtener el sha del archivo actual
-          sha=$(curl -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ env.OWNER_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" $URL | jq -r '.sha')
-          tag=$(grep tag: values.yaml | awk '{print $2}' | uniq | sed -e 's/%//')
-
-          # Actualizar el tag en el archivo yaml
+          cd ${{ inputs.ONBOARDING_NAME }}/${{ inputs.REPO_NAME }}
+          # ls
           sed -i -e "s;tag: $tag;tag: ${{ env.IMAGE_TAG }};g" values.yaml
-
-          cat values.yaml
-          content=$(cat values.yaml | base64 -w0)
-
-          # Actualizar el archivo values.yaml en GitHub
-          update_url="https://api.github.com/repos/${{ env.ORG_NAME }}/${{ env.ONBOARDING_NAME }}/contents/${{ env.REPO_NAME }}/values.yaml"
-          curl -X PUT -H "Accept: application/vnd.github+json" -H "Authorization: Bearer ${{ env.OWNER_TOKEN }}" -H "X-GitHub-Api-Version: 2022-11-28" $update_url -d "{\"message\":\"update version\",\"committer\":{\"name\":\"github-actions[bot]\",\"email\":\"41898282+github-actions[bot]@users.noreply.github.com\"},\"content\":\"$content\",\"sha\":\"$sha\"}" -v
+          # cat values.yaml
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add values.yaml
+          git commit -m "Update ${{ env.IMAGE_NAME }} image tag"
+          git push origin master
