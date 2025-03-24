@@ -112,6 +112,8 @@ jobs:
             fi
           fi
 
+          ls -la
+
           REPO_URL="${{ inputs.REPO_URL }}"
           REPO_URL="${REPO_URL/git:\/\//https:\/\/}"
           REPO_URL="https://carlos-crespo-cambra-NTT:${TOKEN_GITHUB}@${REPO_URL#https://}"
