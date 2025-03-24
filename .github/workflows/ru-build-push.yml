@@ -11,6 +11,10 @@ on:
         description: 'Tag of the image to build.'
         type: string
         required: true
+      REGISTRY:
+        description: 'Registry.'
+        type: string
+        default: 'ghcr.io'
       DOCKERFILE:
         description: 'Path to the Dockerfile to build.'
         type: string
@@ -78,7 +82,7 @@ jobs:
           docker build -f "${{ inputs.DOCKERFILE }}" -t "${{ inputs.IMAGE }}:latest" . --progress=plain --no-cache
 
       - name: Docker login
-        run: docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.OWNER_TOKEN }}
+        run: docker login ${{ inputs.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.OWNER_TOKEN }}
 
       - name: Docker push
         run: docker push  "${{ inputs.IMAGE }}:latest"
