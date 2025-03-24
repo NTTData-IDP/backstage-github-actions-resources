@@ -48,12 +48,14 @@ jobs:
       - name: Clone ${{ inputs.ONBOARDING_NAME }} repository
         uses: actions/checkout@v3
         with:
-          repository: ${{ env.ORGANIZATION_NAME }}/${{ inputs.ONBOARDING_NAME }}
+          repository: ${{ inputs.ORG_NAME }}/${{ inputs.ONBOARDING_NAME }}
           path: ${{ inputs.ONBOARDING_NAME }}
           ref: master
           token: ${{ secrets.OWNER_TOKEN }}
 
       - name: Update ${{ inputs.REPO_NAME }} Image Tag
+        env:
+          IMAGE_TAG: ${{ steps.find-and-replace.outputs.value }}
         run: |
           cd ${{ inputs.ONBOARDING_NAME }}/${{ inputs.REPO_NAME }}
           # ls
@@ -62,5 +64,5 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add values.yaml
-          git commit -m "Update ${{ env.IMAGE_NAME }} image tag"
+          git commit -m "Update ${{ inputs.REPO_NAME }} image tag"
           git push origin master
