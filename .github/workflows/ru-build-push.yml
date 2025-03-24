@@ -79,7 +79,7 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -f "${{ inputs.DOCKERFILE }}" -t "${{ inputs.IMAGE }}:latest" . --progress=plain --no-cache
+          docker build -f "${{ inputs.DOCKERFILE }}" -t "${{ inputs.IMAGE }}:${{ env.IMAGE_TAG }}" . --progress=plain --no-cache
 
       - name: Docker login
         run: docker login ${{ inputs.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.OWNER_TOKEN }}
