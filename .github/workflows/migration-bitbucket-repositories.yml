@@ -1,0 +1,25 @@
+name: Manage Github Repositories Resources
+permissions: write-all
+on:
+  workflow_dispatch:
+    inputs:
+      repository_list_path:
+        description: 'The repository path of json repositories list'
+        required: true
+        type: string
+jobs:
+  setup-init:
+    runs-on: ubuntu-latest
+    steps:
+    - name: estructure
+      # INSTALL DEPENDENCIES
+      # LOGIN BITBUCKET 
+      # Login Github
+      # Recorrer listado repos
+        # Obtener ref repo y clonarlo
+        # Crear nuevo repositorio en Github con el mismo nombre
+        # Subir contenido clonado en local
+      # Correr herramienta migracion bamboo pipelines y analizar o ejecutar
+        
+    
+      
