@@ -25,6 +25,22 @@ jobs:
     - name: Checkout GitHub repository
       uses: actions/checkout@v2
       
+      # in progress
+    # - name: Install OpenSSH
+    #   run: |
+    #     sudo apt update && sudo apt install openssh-client
+    #     ssh -V
+    #     eval "$(ssh-agent -s)"
+    #     ssh-keygen -t ed25519 -b 4096 -C "amolinab@emeal.nttdata.com" -f ~/.ssh/ssh-key-test
+
+        
+    #     ssh-add ~/.ssh/ssh-key-test
+    #     echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/ssh-key-test
+    #     echo "${{ secrets.SSH_PUBLIC_KEY }}" > ~/.ssh/ssh-key-test.pub
+    #     chmod 600 ~/.ssh/ssh-key-test
+    #     ssh-add ~/.ssh/id_ed2551
+        
+      
     # - name: Get List repositories
     #   run: |
     #     curl --request GET \
