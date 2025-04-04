@@ -48,5 +48,4 @@ jobs:
         git clone --mirror https://amolinab1@bitbucket.org/noeorgagutierrez/frontend-angular.git
         cd frontend-angular.git
         git remote set-url --push origin https://${{ secrets.API_TOKEN_GITHUB }}@github.com/NTTData-IDP/frontend-angular.git
-        git push --all
-        git push --tags
+        git push --mirror --force origin
