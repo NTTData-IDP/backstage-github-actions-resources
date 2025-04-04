@@ -2,11 +2,11 @@ name: Migration-Bitbucket-Repositories
 permissions: write-all
 on:
   workflow_dispatch:
-    inputs:
-      repository_list_path:
-        description: 'The repository path of json repositories list'
-        required: true
-        type: string
+    # inputs:
+    #   repository_list_path:
+    #     description: 'The repository path of json repositories list'
+    #     required: false
+    #     type: string
 
       # INSTALL DEPENDENCIES
       # LOGIN BITBUCKET 
