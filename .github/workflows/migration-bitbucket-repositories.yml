@@ -25,12 +25,12 @@ jobs:
     - name: Checkout GitHub repository
       uses: actions/checkout@v2
       
-    - name: Get List repositories
-      run: |
-        curl --request GET \
-          --url 'https://api.bitbucket.org/2.0/repositories/noeorgagutierrez' \
-          --header 'Authorization: Bearer <access_token>' \ #Falta Token por ser premium feature, un acces key no se si es posible
-          --header 'Accept: application/json'
+    # - name: Get List repositories
+    #   run: |
+    #     curl --request GET \
+    #       --url 'https://api.bitbucket.org/2.0/repositories/noeorgagutierrez' \
+    #       --header 'Authorization: Bearer <access_token>' \ #Falta Token por ser premium feature, un acces key no se si es posible
+    #       --header 'Accept: application/json'
 
     - name: Create repository in Github
       run: |
