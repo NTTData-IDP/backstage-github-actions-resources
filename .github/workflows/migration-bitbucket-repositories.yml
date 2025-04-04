@@ -1,11 +1,11 @@
-name: Manage Github Repositories Resources
+name: Migration-Bitbucket-Repositories
 permissions: write-all
 on:
   workflow_dispatch:
     inputs:
       repository_list_path:
         description: 'The repository path of json repositories list'
-        required: true
+        required: false
         type: string
 
       # INSTALL DEPENDENCIES
