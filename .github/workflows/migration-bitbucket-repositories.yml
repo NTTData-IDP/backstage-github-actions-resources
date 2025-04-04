@@ -5,7 +5,7 @@ on:
     inputs:
       repository_list_path:
         description: 'The repository path of json repositories list'
-        required: false
+        required: true
         type: string
 
       # INSTALL DEPENDENCIES
@@ -42,10 +42,10 @@ jobs:
         https://api.github.com/orgs/NTTData-IDP/repos \
         -d '{"name":"frontend-angular","description":"This is your frontend-angular repository","homepage":"https://github.com","private":true,"has_issues":true,"has_projects":true,"has_wiki":true,"auto_init":true}'
     
+    
     - name: Clone Bitbucket repository
       run: |
-        git clone --mirror https://bitbucket.org/noeorgagutierrez/workspace/projects/LAB/frontend-angular.git
+        git clone --mirror https://amolinab1@bitbucket.org/noeorgagutierrez/frontend-angular.git
         cd repositorio-bitbucket.git
-        git remote set-url --push origin https://github.com/NTTData-IDP/repositorio.git
+        git remote set-url --push origin https://github.com/NTTData-IDP/frontend-angular.git
         git push --mirror
-    
